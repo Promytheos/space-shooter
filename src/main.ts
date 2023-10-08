@@ -9,6 +9,7 @@ import { Meteor } from "./game-objects/falling-objects/meteor";
 import { update } from "@tweenjs/tween.js";
 import { PlayerScene } from "./scenes/player/player-scene";
 import { Direction, Effects, PlayerStates } from "./types";
+import { collisionTest } from "./utils";
 
 export const KILL_ZONE = 1000;
 
@@ -56,8 +57,16 @@ function spawnObject(): void {
   const object = objectPool.get();
   activeObjects.push(object);
   app.stage.addChild(object);
+  object.visible = true;
   object.position.x = Math.floor(Math.random() * (app.screen.width - object.width));
   object.position.y = -200;
+}
+
+function killObject(object: FallingObject, objectIndex: number): void {
+  objectPool.returnToPool(object);
+  activeObjects.splice(objectIndex, 1);
+  object.visible = false;
+  object.resetPosition();
 }
 
 registerInputs();
@@ -78,21 +87,38 @@ app.ticker.add((delta) => {
     spawnObject();
   }
 
-  for (const object of activeObjects) {
-    if (object.isCollidingWith(playerScene.player)) {
+  activeObjects.forEach((object, objectIndex) => {
+    if (collisionTest(object, playerScene.player)) {
       gameOver = true;
     }
     else {
       if (object.y > KILL_ZONE) {
-        object.resetPosition();
-        objectPool.returnToPool(object);
-        activeObjects.splice(activeObjects.indexOf(object), 1);
+        killObject(object, objectIndex);
       }
       else {
+        if (!object.visible) {
+          debugger;
+        }
         object.update(delta)
       }
     }
-  }
+    playerScene.shots.forEach((shot, index) => {
+      if (collisionTest(object, shot.left)) {
+        shot.left.collide()
+          .then(() => {
+            killObject(object, objectIndex);
+            playerScene.killShot(shot, index);
+          });
+      }
+      else if (collisionTest(object, shot.right)) {
+        shot.right.collide()
+          .then(() => {
+            killObject(object, objectIndex);
+            playerScene.killShot(shot, index);
+          });
+      }
+    });
+  });
 });
 
 const speeds = [0, 1/16, 1/4, 1/2, 1, 2, 4, 16];

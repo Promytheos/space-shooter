@@ -4,11 +4,13 @@ import { Player, PlayerEvents } from "../../game-objects";
 import { ObjectPool } from "../../utils/object-pool";
 import { PlayerShot } from "../../game-objects/shots";
 
+export type ShotPair = { left: PlayerShot, right: PlayerShot };
+
 export class PlayerScene extends Container {
   public objects: Array<GameObject> = [];
   public player: Player;
   private _shotPool: ObjectPool<PlayerShot>;
-  public shots: Array<PlayerShot> = [];
+  public shots: Array<ShotPair> = [];
 
   constructor() {
     super();
@@ -38,16 +40,19 @@ export class PlayerScene extends Container {
     this.player.onEvent(PlayerEvents.SHOOT, () => {
       const leftShot = this._shotPool.get();
       this.addChild(leftShot);
-      this.shots.push(leftShot);
-      leftShot.x = this.player.position.x - 45;
+      leftShot.x = this.player.position.x - 47;
       leftShot.y = this.player.position.y - 45;
       leftShot.fire();
       const rightShot = this._shotPool.get();
       this.addChild(rightShot);
-      this.shots.push(rightShot);
-      rightShot.x = this.player.position.x + 45;
+      rightShot.x = this.player.position.x + 47;
       rightShot.y = this.player.position.y - 45;
       rightShot.fire();
+
+      this.shots.push({
+        left: leftShot,
+        right: rightShot
+      });
     })
   }
 
@@ -55,17 +60,23 @@ export class PlayerScene extends Container {
     this.player.update(delta);
 
     this.shots.forEach((shot, index) => {
-      if (shot.y < 0) {
-        this._shotPool.returnToPool(shot);
-        this.shots.splice(index, 1);
+      if (shot.left.y < 0) {
+        this.killShot(shot, index);
       }
       else {
-        shot.update(delta);
+        shot.left.update(delta);
+        shot.right.update(delta);
       }
     });
 
     for (const object of this.objects) {
       object.update(delta);
     }
+  }
+
+  killShot(shot: ShotPair, shotIndex: number): void {
+    this._shotPool.returnToPool(shot.left);
+    this._shotPool.returnToPool(shot.right);
+    this.shots.splice(shotIndex, 1);
   }
 }
