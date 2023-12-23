@@ -41,7 +41,8 @@ const objectPool: ObjectPool<FallingObject> = new ObjectPool(
   {
     initialSize: 10,
     maxSize: 20
-  }
+  },
+  (object: FallingObject) => { object.visible = false; object.resetPosition(); object.setVelocity(0); }
 );
 
 function createFallingObject(): FallingObject {
@@ -55,18 +56,18 @@ function spawnObject(): void {
   spawnCounter = 0;
   spawnThreshold = Math.random() * 100;
   const object = objectPool.get();
-  activeObjects.push(object);
-  app.stage.addChild(object);
+  object.setVelocity(5);
   object.visible = true;
   object.position.x = Math.floor(Math.random() * (app.screen.width - object.width));
   object.position.y = -200;
+  activeObjects.push(object);
+  app.stage.addChild(object);
 }
 
 function killObject(object: FallingObject, objectIndex: number): void {
   objectPool.returnToPool(object);
   activeObjects.splice(objectIndex, 1);
-  object.visible = false;
-  object.resetPosition();
+  app.stage.removeChild(object);
 }
 
 registerInputs();
@@ -96,23 +97,20 @@ app.ticker.add((delta) => {
         killObject(object, objectIndex);
       }
       else {
-        if (!object.visible) {
-          debugger;
-        }
         object.update(delta)
       }
     }
     playerScene.shots.forEach((shot, index) => {
       if (collisionTest(object, shot.left)) {
         shot.left.collide()
-          .then(() => {
+        .then(() => {
             killObject(object, objectIndex);
             playerScene.killShot(shot, index);
           });
       }
       else if (collisionTest(object, shot.right)) {
         shot.right.collide()
-          .then(() => {
+        .then(() => {
             killObject(object, objectIndex);
             playerScene.killShot(shot, index);
           });
