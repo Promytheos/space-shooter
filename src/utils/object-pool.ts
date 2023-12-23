@@ -27,9 +27,11 @@ export class ObjectPool<T> {
   constructor(
     public readonly name: string,
     createFn: () => T,
-    poolConfig: ObjectPoolConfig = {}
+    poolConfig: ObjectPoolConfig = {},
+    onReturn?: (arg: T) => void
   ) {
     this.add = createFn;
+    this.onReturn = onReturn;
     const {
       initialSize = 0,
       maxSize = 100,
