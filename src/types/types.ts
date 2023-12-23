@@ -3,7 +3,7 @@ export const enum Direction {
   RIGHT = "right"
 }
 
-export const FallingObjects: ReadonlyArray<string> = [
+export const FALLING_OBJECTS: ReadonlyArray<string> = [
   "characters/enemyShip.png",
   "characters/enemyUFO.png"
 ];

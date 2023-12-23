@@ -1,8 +1,6 @@
 import { Sprite } from "pixi.js";
 import { GameObject } from "../../types/game-object";
 import { FallingObject } from "./falling-object";
-import { FallingObjects } from "../../types";
-import { app } from "../../main";
 
 export class Meteor extends FallingObject implements GameObject {
   protected _sprite!: Sprite;
