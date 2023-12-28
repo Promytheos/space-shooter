@@ -1,6 +1,7 @@
+import { Player } from "../game-objects";
 import { GameObject } from "../types";
 
-export function collisionTest(objectA: GameObject, objectB: GameObject): boolean {
+export function collisionTest(objectA: GameObject | Player, objectB: GameObject | Player): boolean {
   const ab = objectA.getBounds();
   const bb = objectB.getBounds();
   const hasCollided = !(ab.x > bb.x + bb.width ||

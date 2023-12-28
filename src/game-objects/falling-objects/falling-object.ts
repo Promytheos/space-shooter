@@ -1,19 +1,26 @@
 import { Container, Sprite } from "pixi.js";
-import { FALLING_OBJECTS, GameObject } from "../../types";
+import { FALLING_OBJECTS, GameObject, OBJECT_STATE } from "../../types";
 
 export class FallingObject extends Container implements GameObject {
+  state: OBJECT_STATE = OBJECT_STATE.DEAD;
   protected _velocity = 0;
   protected _sprite!: Sprite;
+
+  setState(state: OBJECT_STATE): void {
+    this.state = state;
+  }
 
   spawn(): void {
     this.setSprite();
     this.y = -200;
     this.setVelocity(5);
+    this.setState(OBJECT_STATE.ALIVE);
   }
 
-  reset(): void {
+  kill(): void {
     this.removeChild(this._sprite);
     this.setVelocity(0);
+    this.setState(OBJECT_STATE.DEAD);
   }
 
   setSprite(): void {

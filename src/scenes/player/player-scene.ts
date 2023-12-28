@@ -1,16 +1,13 @@
 import { Container } from "pixi.js";
-import { GameObject } from "../../types/game-object";
+import { OBJECT_STATE } from "../../types/game-object";
 import { Player, PlayerEvents } from "../../game-objects";
 import { ObjectPool } from "../../utils/object-pool";
 import { PlayerShot } from "../../game-objects/shots";
 
-export type ShotPair = { left: PlayerShot, right: PlayerShot };
-
 export class PlayerScene extends Container {
-  public objects: Array<GameObject> = [];
   public player: Player;
   private _shotPool: ObjectPool<PlayerShot>;
-  public shots = new Set<ShotPair>();
+  public shots = new Set<PlayerShot>();
 
   constructor() {
     super();
@@ -29,10 +26,7 @@ export class PlayerScene extends Container {
       }
     );
 
-    this._shotPool.onReturn = (shot: PlayerShot) => {
-      shot.reset();
-      this.removeChild(shot);
-    }
+    this._shotPool.onReturn = (shot: PlayerShot) => shot.kill();
 
     this.player.position.x = 319;
     this.player.position.y = 900;
@@ -42,17 +36,16 @@ export class PlayerScene extends Container {
       this.addChild(leftShot);
       leftShot.x = this.player.position.x - 47;
       leftShot.y = this.player.position.y - 45;
-      leftShot.fire();
+      leftShot.spawn();
+
       const rightShot = this._shotPool.get();
       this.addChild(rightShot);
       rightShot.x = this.player.position.x + 47;
       rightShot.y = this.player.position.y - 45;
-      rightShot.fire();
+      rightShot.spawn();
 
-      this.shots.add({
-        left: leftShot,
-        right: rightShot
-      });
+      this.shots.add(leftShot);
+      this.shots.add(rightShot);
     })
   }
 
@@ -60,23 +53,19 @@ export class PlayerScene extends Container {
     this.player.update(delta);
 
     for (const shot of this.shots) {
-      if (shot.left.y < 0) {
+      if (shot.state === OBJECT_STATE.DEAD) {
+        continue;
+      }
+      if (shot.y < 0 || shot.y < 0) {
         this.killShot(shot);
       }
       else {
-        shot.left.update(delta);
-        shot.right.update(delta);
+        shot.update(delta);
       }
-    }
-
-    for (const object of this.objects) {
-      object.update(delta);
     }
   }
 
-  killShot(shot: ShotPair): void {
-    this._shotPool.returnToPool(shot.left);
-    this._shotPool.returnToPool(shot.right);
-    this.shots.delete(shot);
+  killShot(shot: PlayerShot): void {
+    this._shotPool.returnToPool(shot);
   }
 }

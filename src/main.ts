@@ -6,7 +6,7 @@ import { KeyHandler } from "./utils/key";
 import { Meteor } from "./game-objects/falling-objects/meteor";
 import { update } from "@tweenjs/tween.js";
 import { PlayerScene } from "./scenes/player/player-scene";
-import { Direction } from "./types";
+import { Direction, OBJECT_STATE } from "./types";
 import { collisionTest } from "./utils";
 
 export const KILL_ZONE = 1000;
@@ -28,7 +28,7 @@ document.body.appendChild(app.view);
 document.body.style.backgroundColor = "#777777";
 document.body.style.margin = "0px";
 
-const activeObjects = new Set<FallingObject>();
+const fallingObjects = new Set<FallingObject>();
 let spawnCounter = 0;
 let spawnThreshold = 0;
 const background = new ScrollingBackground();
@@ -40,15 +40,12 @@ const objectPool: ObjectPool<FallingObject> = new ObjectPool(
     initialSize: 10,
     maxSize: 20
   },
-  (object: FallingObject) => {
-    object.visible = false;
-    object.setVelocity(0);
-    object.reset();
-  }
+  (object: FallingObject) => killObject(object)
 );
 
 function createFallingObject(): FallingObject {
   const object = Math.random() > 0.55 ? new FallingObject() : new Meteor();
+  fallingObjects.add(object);
   return object;
 }
 
@@ -61,14 +58,13 @@ function spawnObject(): void {
   object.spawn();
   object.visible = true;
   object.x = Math.floor(Math.random() * (app.screen.width - object.width));
-  activeObjects.add(object);
   app.stage.addChild(object);
 }
 
 function killObject(object: FallingObject): void {
-  objectPool.returnToPool(object);
-  activeObjects.delete(object);
   app.stage.removeChild(object);
+  object.visible = false;
+  object.kill();
 }
 
 registerInputs();
@@ -86,42 +82,39 @@ app.ticker.add((delta) => {
   spawnCounter += delta;
 
   if (spawnCounter > spawnThreshold) {
-    // spawnObject();
+    spawnObject();
   }
 
-  for (const object of activeObjects) {
+  for (const object of fallingObjects) {
+    if (object.state === OBJECT_STATE.DEAD) {
+      continue;
+    }
     if (collisionTest(object, playerScene.player)) {
       gameOver = true;
-      console.log('COLLISION WITH PLAYER');
     }
     else {
       if (object.y > KILL_ZONE) {
-        console.log('OBJECT OFF SCREEN');
-        killObject(object);
+        objectPool.returnToPool(object);
       }
       else {
         object.update(delta)
       }
     }
 
-    playerScene.shots.forEach((shot, index) => {
-      if (collisionTest(object, shot.left)) {
-        console.log('OBJECT COLLIDED WITH LEFT SHOT');
-        shot.left.collide()
+    for (const shot of playerScene.shots) {
+      if (shot.state === OBJECT_STATE.DEAD) {
+        continue;
+      }
+      if (collisionTest(object, shot)) {
+        shot.setState(OBJECT_STATE.DEAD);
+        object.setState(OBJECT_STATE.DEAD);
+        shot.collide()
         .then(() => {
-            killObject(object);
+            objectPool.returnToPool(object);
             playerScene.killShot(shot);
           });
       }
-      else if (collisionTest(object, shot.right)) {
-        console.log('OBJECT COLLIDED WITH RIGHT SHOT');
-        shot.right.collide()
-        .then(() => {
-            killObject(object);
-            playerScene.killShot(shot);
-          });
-      }
-    });
+    }
   }
 });
 

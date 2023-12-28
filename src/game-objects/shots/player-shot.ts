@@ -1,5 +1,5 @@
 import { Container, ObservablePoint, Sprite } from "pixi.js";
-import { Effects, GameObject, Shot } from "../../types";
+import { Effects, GameObject, OBJECT_STATE, Shot } from "../../types";
 import { Tween } from "@tweenjs/tween.js";
 
 const PLAYER_SHOT_SPEED = 50;
@@ -10,6 +10,8 @@ export class PlayerShot extends Container implements Shot {
   private _collisionTween: Tween<ObservablePoint<any>>;
   private _hitSprite: Sprite;
   speed: number = 0;
+  state: OBJECT_STATE = OBJECT_STATE.DEAD;
+
   constructor() {
     super();
     this._sprite = Sprite.from(Effects.PLAYER_SHOT);
@@ -39,7 +41,12 @@ export class PlayerShot extends Container implements Shot {
     });
   }
 
-  fire(): void {
+  setState(state: OBJECT_STATE): void {
+    this.state = state;
+  }
+
+  spawn(): void {
+    this.setState(OBJECT_STATE.ALIVE);
     this._fireTween.start();
   }
 
@@ -52,12 +59,13 @@ export class PlayerShot extends Container implements Shot {
     return new Promise<void>(resolve => this._collisionTween.onComplete(() => resolve()));
   }
 
-  reset(): void {
+  kill(): void {
     this.speed = 0;
     this._fireTween.stop();
     this._sprite.scale.set(1, 0);
     this._sprite.visible = true;
     this._hitSprite.visible = false;
+    this.setState(OBJECT_STATE.DEAD);
   }
 
   update(delta: number): void {
