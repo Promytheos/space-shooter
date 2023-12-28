@@ -10,7 +10,7 @@ export class PlayerScene extends Container {
   public objects: Array<GameObject> = [];
   public player: Player;
   private _shotPool: ObjectPool<PlayerShot>;
-  public shots: Array<ShotPair> = [];
+  public shots = new Set<ShotPair>();
 
   constructor() {
     super();
@@ -49,7 +49,7 @@ export class PlayerScene extends Container {
       rightShot.y = this.player.position.y - 45;
       rightShot.fire();
 
-      this.shots.push({
+      this.shots.add({
         left: leftShot,
         right: rightShot
       });
@@ -59,24 +59,24 @@ export class PlayerScene extends Container {
   update(delta: number): void {
     this.player.update(delta);
 
-    this.shots.forEach((shot, index) => {
+    for (const shot of this.shots) {
       if (shot.left.y < 0) {
-        this.killShot(shot, index);
+        this.killShot(shot);
       }
       else {
         shot.left.update(delta);
         shot.right.update(delta);
       }
-    });
+    }
 
     for (const object of this.objects) {
       object.update(delta);
     }
   }
 
-  killShot(shot: ShotPair, shotIndex: number): void {
+  killShot(shot: ShotPair): void {
     this._shotPool.returnToPool(shot.left);
     this._shotPool.returnToPool(shot.right);
-    this.shots.splice(shotIndex, 1);
+    this.shots.delete(shot);
   }
 }

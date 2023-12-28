@@ -86,7 +86,7 @@ app.ticker.add((delta) => {
   spawnCounter += delta;
 
   if (spawnCounter > spawnThreshold) {
-    spawnObject();
+    // spawnObject();
   }
 
   for (const object of activeObjects) {
@@ -110,7 +110,7 @@ app.ticker.add((delta) => {
         shot.left.collide()
         .then(() => {
             killObject(object);
-            playerScene.killShot(shot, index);
+            playerScene.killShot(shot);
           });
       }
       else if (collisionTest(object, shot.right)) {
@@ -118,7 +118,7 @@ app.ticker.add((delta) => {
         shot.right.collide()
         .then(() => {
             killObject(object);
-            playerScene.killShot(shot, index);
+            playerScene.killShot(shot);
           });
       }
     });
