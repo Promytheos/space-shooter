@@ -1,4 +1,10 @@
-export class Key {
+interface HandlerConfig {
+  press?: Function;
+  release?: Function;
+}
+
+// TODO: Refactor to handle multiple events
+export class KeyHandler {
     readonly value: string;
     isDown: boolean;
     isUp: boolean;
@@ -7,12 +13,12 @@ export class Key {
     downListener: (event: KeyboardEvent) => void;
     upListener: (event: KeyboardEvent) => void;
 
-    constructor(value: string) {
+    constructor(value: string, handlerConfig: HandlerConfig = {}) {
         this.value = value;
         this.isDown = false;
         this.isUp = true;
-        this.press = undefined;
-        this.release = undefined;
+        this.press = handlerConfig.press;
+        this.release = handlerConfig.release;
         this.downListener = this.downHandler.bind(this);
         this.upListener = this.upHandler.bind(this);
 

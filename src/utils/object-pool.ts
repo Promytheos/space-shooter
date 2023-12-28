@@ -1,5 +1,3 @@
-import { PoolObject } from "../types";
-
 export interface ObjectPoolConfig {
   initialSize?: number;
   maxSize?: number;
@@ -13,7 +11,7 @@ export interface ObjectPoolConfig {
  * @param {ObjectPoolConfig} poolConfig - optional config to set up the pool
  * @param {number} [poolConfig.initialSize=0] default=0 - if this is set, the object pool will be initialised with this many objects in it
  * @param {number} [poolConfig.maxSize=100] default=100 - if this is set, the object pool will not create more objects than this amount, a warning will be thrown if this is attempted. Ignored if autoIncrease is supplied
- * @param {boolean} [poolConfig.autoIncrease=true] default=true - decides whether the pool should create more objects than the initialSize or the maxSize (depending on which is supplied)
+ * @param {boolean} [poolConfig.autoIncrease=false] default=false - decides whether the pool should create more objects than the initialSize or the maxSize (depending on which is supplied)
  */
 export class ObjectPool<T> {
   private readonly _initialSize: number;
