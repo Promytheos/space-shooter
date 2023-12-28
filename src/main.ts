@@ -91,7 +91,7 @@ app.ticker.add((delta) => {
 
   for (const object of activeObjects) {
     if (collisionTest(object, playerScene.player)) {
-      // gameOver = true;
+      gameOver = true;
       console.log('COLLISION WITH PLAYER');
     }
     else {
