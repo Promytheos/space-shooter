@@ -4,9 +4,6 @@ import { FallingObject } from "./falling-object";
 
 export class Meteor extends FallingObject implements GameObject {
   private _rotationSpeed!: number;
-  constructor() {
-    super();
-  }
 
   setSprite(): void {
     const spriteName = Math.random() > 0.6 ? "objects/meteorBig.png" : "objects/meteorSmall.png";

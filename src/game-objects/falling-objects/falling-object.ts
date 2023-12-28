@@ -4,9 +4,6 @@ import { FALLING_OBJECTS, GameObject } from "../../types";
 export class FallingObject extends Container implements GameObject {
   protected _velocity = 0;
   protected _sprite!: Sprite;
-  constructor() {
-    super();
-  }
 
   spawn(): void {
     this.setSprite();
