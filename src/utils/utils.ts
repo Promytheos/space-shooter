@@ -15,7 +15,6 @@ export function collisionTest(objectA: GameObject, objectB: GameObject): boolean
     if (!objectB.visible) {
       console.log(objectB);
     }
-    debugger;
     throw new Error(`Collision with invisible object`);
   }
 
