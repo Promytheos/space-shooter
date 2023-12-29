@@ -71,11 +71,13 @@ registerInputs();
 
 const playerScene = new PlayerScene();
 app.stage.addChild(playerScene);
+const objectsToReturn = new Set<FallingObject>();
 
 app.ticker.add((delta) => {
   if (gameOver) {
     return;
   }
+
   playerScene.update(delta);
   update();
   background.update(delta);
@@ -94,7 +96,7 @@ app.ticker.add((delta) => {
     }
     else {
       if (object.y > KILL_ZONE) {
-        objectPool.returnToPool(object);
+        objectsToReturn.add(object);
       }
       else {
         object.update(delta)
@@ -110,12 +112,17 @@ app.ticker.add((delta) => {
         object.setState(OBJECT_STATE.DEAD);
         shot.collide()
         .then(() => {
-            objectPool.returnToPool(object);
+            objectsToReturn.add(object);
             playerScene.killShot(shot);
           });
       }
     }
   }
+
+  for (const object of objectsToReturn) {
+    objectPool.returnToPool(object);
+  }
+  objectsToReturn.clear();
 });
 
 const speeds = [0, 1/16, 1/4, 1/2, 1, 2, 4, 16];
