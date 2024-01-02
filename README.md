@@ -20,4 +20,3 @@ To start playing Space Shooter, simply run the following command in your termina
 `npm run start`
 
 This command will build and run the project. A browser window should automatically open, and you can start playing the game.
-
