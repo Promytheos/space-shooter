@@ -26,19 +26,19 @@ export class PlayerShot extends Container implements Shot {
     this._hitSprite.visible = false;
 
     this._fireTween = new Tween(this._sprite.scale)
-    .to({ y: -1 }, 40)
-    .onUpdate(({ y }) =>{
-      this._sprite.scale.y = y;
-    })
-    .onComplete(() => {
-      this.speed = PLAYER_SHOT_SPEED;
-    });
+      .to({ y: -1 }, 40)
+      .onUpdate(({ y }) => {
+        this._sprite.scale.y = y;
+      })
+      .onComplete(() => {
+        this.speed = PLAYER_SHOT_SPEED;
+      });
 
     this._collisionTween = new Tween(this._hitSprite.scale)
-    .to({ x: 1, y: 1 }, 40)
-    .onUpdate(({ y }) =>{
-      this._sprite.scale.y = y;
-    });
+      .to({ x: 1, y: 1 }, 40)
+      .onUpdate(({ y }) => {
+        this._sprite.scale.y = y;
+      });
   }
 
   setState(state: OBJECT_STATE): void {

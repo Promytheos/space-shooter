@@ -1,4 +1,4 @@
-import { Container, Point, Sprite } from "pixi.js";
+import { Container, Sprite, Ticker } from "pixi.js";
 import { Background_Color } from "../../types";
 import { ObjectPool } from "../../utils/object-pool";
 import { KILL_ZONE, app } from "../../main";
@@ -39,6 +39,8 @@ export class ScrollingBackground extends Container {
     this._starPool.onReturn = (star: Sprite) => {
       this.removeChild(star);
     };
+
+     Ticker.shared.add(this.update.bind(this));
   }
 
   getCloud(): Sprite {
